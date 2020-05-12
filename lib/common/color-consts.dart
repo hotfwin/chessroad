@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 class ColorConsts {
 
   // Logo 的颜色，一般都是品牌色
