@@ -1,9 +1,9 @@
 import 'cc-base.dart';
 
-//象棋局面
+//象棋局面(记录棋子与棋子位置)
 class Phase {
   String _side; //当前行棋方
-
+              
 // 中国象棋的棋子放在纵线交叉点上，棋盘上总共有10行9列的交叉点位，一共90个位置
   List<String> _pieces; // 10 行，9 列
 
@@ -69,5 +69,22 @@ class Phase {
       _pieces[i] ??= Piece.Empty;
     }
   }
-  
+
+  bool move(int from, int to) {
+    if(!validateMove(from, to)) return false;
+
+    //修改棋盘
+    _pieces[to]=_pieces[from];
+    _pieces[from]=Piece.Empty;
+
+    //交换走棋 方
+    _side=Side.oppo(_side);
+
+    return true;
+  }
+
+  ///验证移动棋子的走法是否合法
+  bool validateMove(int from, int to) {
+    return true;
+  }
 }

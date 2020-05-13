@@ -52,11 +52,11 @@ class BoardPainter extends PainterBase {
 
     //中轴线
     paint.strokeWidth = 1;
-    canvas.drawLine(
-      Offset(left + gridWidth / 2, top),
-      Offset(left + gridWidth / 2, squareSide * 9),
-      paint,
-    );
+    // canvas.drawLine(
+    //   Offset(left + gridWidth / 2, top),
+    //   Offset(left + gridWidth / 2, squareSide * 9),
+    //   paint,
+    // );
 
     //8根中间横线
     for (var i = 1; i < 9; i++) {

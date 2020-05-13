@@ -71,3 +71,79 @@ class Piece {
   static bool isRed(String c) => 'RNBAKCP'.contains(c);   //是否为红方
   static bool isBlack(String c) => 'rnbakcp'.contains(c);  //是否为黑方
 }
+
+class Move {
+  //
+  static const InvalidIndex = -1;
+
+  // List<String>(90) 中的索引
+  int from, to;
+
+  // 左上角为坐标原点
+  int fx, fy, tx, ty;
+
+  String captured;
+
+  // 'step' is the ucci engine's move-string
+  String step;
+  String stepName;
+  
+  // 这一步走完后的 FEN 记数，用于悔棋时恢复 FEN 步数 Counter
+  String counterMarks;
+
+  Move(this.from, this.to, {this.captured = Piece.Empty, this.counterMarks = '0 0'}) {
+    //
+    fx = from % 9;
+    fy = from ~/ 9;
+
+    tx = to % 9;
+    ty = to ~/ 9;
+
+    if (fx < 0 || fx > 8 || fy < 0 || fy > 9) {
+      throw "Error: Invlid Step (from:$from, to:$to)";
+    }
+
+    step = String.fromCharCode('a'.codeUnitAt(0) + fx) + (9 - fy).toString();
+    step += String.fromCharCode('a'.codeUnitAt(0) + tx) + (9 - ty).toString();
+  }
+
+  /// 引擎返回的招法用是 4 个字符表示的，例如 b0c2
+  /// 它的着法基于左下角坐标系
+  /// 用 a ~ i 表示从左到右的 9 列
+  /// 用 0 ~ 9 表示从下到上 10 行
+  /// 因此 b0c2 表示从第 2 列第 1 行移动到第 3 列第 3 行
+
+  Move.fromEngineStep(String step) {
+    //
+    this.step = step;
+
+    if (!validateEngineStep(step)) {
+      throw "Error: Invlid Step: $step";
+    }
+
+    fx = step[0].codeUnitAt(0) - 'a'.codeUnitAt(0);
+    fy = 9 - (step[1].codeUnitAt(0) - '0'.codeUnitAt(0));
+    tx = step[2].codeUnitAt(0) - 'a'.codeUnitAt(0);
+    ty = 9 - (step[3].codeUnitAt(0) - '0'.codeUnitAt(0));
+
+    from = fx + fy * 9;
+    to = tx + ty * 9;
+
+    captured = Piece.Empty;
+  }
+
+  static bool validateEngineStep(String step) {
+    //
+    if (step == null || step.length < 4) return false;
+
+    final fx = step[0].codeUnitAt(0) - 'a'.codeUnitAt(0);
+    final fy = 9 - (step[1].codeUnitAt(0) - '0'.codeUnitAt(0));
+    if (fx < 0 || fx > 8 || fy < 0 || fy > 9) return false;
+
+    final tx = step[2].codeUnitAt(0) - 'a'.codeUnitAt(0);
+    final ty = 9 - (step[3].codeUnitAt(0) - '0'.codeUnitAt(0));
+    if (tx < 0 || tx > 8 || ty < 0 || ty > 9) return false;
+
+    return true;
+  }
+}

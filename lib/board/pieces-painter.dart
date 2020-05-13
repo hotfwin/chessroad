@@ -9,9 +9,15 @@ import '../common/color-consts.dart';
 //这是画棋子
 class PiecesPainter extends PainterBase {
   final Phase phase;
+  final int focusIndex, blurIndex; //棋盘上的棋子移动、选择位置指示
   double pieceSide; //棋子的宽度 = 棋盘一个格子的宽度 * 90%
-  PiecesPainter({@required double width, @required this.phase})
-      : super(width: width) {
+  PiecesPainter({
+    @required double width,
+    @required this.phase,
+    // 添加棋盘上的棋子移动、选择位置指示，-1 表示无效，不用绘制
+    this.focusIndex = -1,
+    this.blurIndex = -1,
+  }) : super(width: width) {
     pieceSide = squareSide * 0.9; //棋子的宽度 = 棋盘一个格子的宽度 * 90%
   }
 
@@ -26,6 +32,8 @@ class PiecesPainter extends PainterBase {
       pieceSide: pieceSide,
       offsetX: BoardWidget.Padding + squareSide / 2,
       offsetY: BoardWidget.Padding + BoardWidget.DigitsHeight + squareSide / 2,
+      focusIndex: focusIndex,
+      blurIndex: blurIndex,
     );
   }
 
@@ -45,6 +53,8 @@ class PiecesPainter extends PainterBase {
     double pieceSide,
     double offsetX,
     double offsetY,
+    int focusIndex = -1,
+    int blurIndex = 1,
   }) {
     //
     final left = offsetX, top = offsetY;
@@ -88,7 +98,7 @@ class PiecesPainter extends PainterBase {
     final textStyle = TextStyle(
       color: ColorConsts.PieceTextColor,
       fontSize: pieceSide * 0.8,
-      fontFamily: 'QiTi',     //添加字体
+      fontFamily: 'QiTi', //添加字体
       height: 1.0,
     );
 
@@ -128,6 +138,35 @@ class PiecesPainter extends PainterBase {
       // 将文字绘制到 Canvas 上
       textPainter.paint(canvas, textOffset);
     });
+
+    // draw focus and blur position
+    // 绘制棋子的选定效果，注意绘制的次序，先绘制的在下层
+    if (focusIndex != -1) {
+      final int row = focusIndex ~/ 9, column = focusIndex % 9; //还原棋盘坐票
+      paint.color = ColorConsts.FocusPosition;
+      paint.style = PaintingStyle.stroke;
+      paint.strokeWidth = 2;
+
+      canvas.drawCircle(
+        Offset(left + column * squareSide, top + row * squareSide),
+        pieceSide / 2,
+        paint,
+      );
+
+    }
+    if (blurIndex != -1) {
+      //
+      final row = blurIndex ~/ 9, column = blurIndex % 9;
+
+      paint.color = ColorConsts.BlurPosition;
+      paint.style = PaintingStyle.fill;
+
+      canvas.drawCircle(
+        Offset(left + column * squareSide, top + row * squareSide),
+        pieceSide / 2 * 0.8,
+        paint,
+      );
+    }
   }
 }
 

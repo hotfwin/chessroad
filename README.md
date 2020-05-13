@@ -1,6 +1,6 @@
-# chessroad
+# chessroad(中国象棋Flutter练手)
 
-A new Flutter project.
+这是一个中国象棋练手（Flutter）程序
 
 ## Getting Started
 
