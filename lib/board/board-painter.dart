@@ -1,17 +1,16 @@
 import 'dart:math';
 
+import 'painter-base.dart';
+
 import '../common/color-consts.dart';
 import 'package:flutter/material.dart';
 import 'board-widget.dart';
 
 //画棋盘线
-class BoardPainter extends CustomPainter {
-  // 棋盘的宽度， 横盘上线格的总宽度，每一个格子的边长
-  final double width, gridWidth, squareSide;
-  final thePaint = Paint();
-  BoardPainter({@required this.width})
-      : gridWidth = (width - BoardWidget.Padding * 2) * 8 / 9,
-        squareSide = (width - BoardWidget.Padding * 2) / 9;
+class BoardPainter extends PainterBase {
+  
+
+  BoardPainter({@required double width}) : super(width: width);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -139,7 +138,5 @@ class BoardPainter extends CustomPainter {
       var rect = Rect.fromCenter(center: pos, width: 10, height: 10);
       canvas.drawArc(rect, pi / 2, pi, true, paint);
     });
-
-
   }
 }
