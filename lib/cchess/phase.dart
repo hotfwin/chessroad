@@ -1,21 +1,22 @@
 import 'cc-base.dart';
 
-//象棋局面(记录棋子与棋子位置)
+// 用车、马、相、士、将、炮、兵的英文单词首字母表示对应的棋子。有一个例外，那就是代表「马」的单词 Knight 和代表「将」的单词 King 都是以 'K' 开头，所以约定了用 'N' 或 'n' 来代表「马」，'K'或'k'代表「将」或「帅」。
+// 此外，棋软开发者还约定，黑棋用小写字母表示，红棋用对应的大写字母表示。
+// 这样一来，棋盘上 10 横 9 纵共 90 个交叉点，我们就可以用一个数组来表示棋盘上的棋子分布了。
+// 「棋子分布」加上「当前轮谁走棋」两个信息，共同构成了一个象棋的「局面」信息
 class Phase {
   String _side; //当前行棋方
-              
-// 中国象棋的棋子放在纵线交叉点上，棋盘上总共有10行9列的交叉点位，一共90个位置
-  List<String> _pieces; // 10 行，9 列
+
+  // 中国象棋的棋子放在纵线交叉点上，棋盘上总共有10行9列的交叉点位，一共90个位置
+  List<String> _pieces; // 10行9列
 
   get side => _side;
 
-  trunSide() => _side = Side.oppo(_side); //改变行棋方
+  trunSide() => _side = Side.oppo(side); //交换下棋方
 
-  // 查询10行9列的某个位置上的棋子
-  String pieceAt(int index) => _pieces[index];
+  String pieceAt(int index) => _pieces[index]; //查询10行9列的某个位置上的棋子
 
-  //初始化局面，开局
-  Phase.defaultPhase() {
+  Phase.defaultPhase() { 
     //
     _side = Side.Red;
     _pieces = List<String>(90);
@@ -68,23 +69,27 @@ class Phase {
     for (var i = 0; i < 90; i++) {
       _pieces[i] ??= Piece.Empty;
     }
+  } 
+
+  /// 验证移动棋子的着法是否合法
+  bool validateMove(int from, int to) {
+    // TODO:
+    return true;
   }
 
   bool move(int from, int to) {
-    if(!validateMove(from, to)) return false;
+    //
+    if (!validateMove(from, to)) return false;
 
-    //修改棋盘
-    _pieces[to]=_pieces[from];
-    _pieces[from]=Piece.Empty;
+    // 修改棋盘
+    _pieces[to] = _pieces[from];
+    _pieces[from] = Piece.Empty;
 
-    //交换走棋 方
-    _side=Side.oppo(_side);
+    // 交换走棋方
+    // _side = Side.oppo(_side);
 
     return true;
   }
 
-  ///验证移动棋子的走法是否合法
-  bool validateMove(int from, int to) {
-    return true;
-  }
+
 }

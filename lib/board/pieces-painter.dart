@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
-
 import 'board-widget.dart';
 import 'painter-base.dart';
+import '../common/color-consts.dart';
 import '../cchess/phase.dart';
 import '../cchess/cc-base.dart';
-import '../common/color-consts.dart';
 
-//这是画棋子
+class PiecePaintStub {
+  final String piece;
+  final Offset pos; // 棋子呈现位置
+  PiecePaintStub({this.piece, this.pos});
+}
+
+//绘制棋子
 class PiecesPainter extends PainterBase {
   final Phase phase;
-  final int focusIndex, blurIndex; //棋盘上的棋子移动、选择位置指示
   double pieceSide; //棋子的宽度 = 棋盘一个格子的宽度 * 90%
+  final int focusIndex, blurIndex; //添加棋盘上的棋子移动、选择位置指示
   PiecesPainter({
     @required double width,
     @required this.phase,
@@ -18,30 +23,7 @@ class PiecesPainter extends PainterBase {
     this.focusIndex = -1,
     this.blurIndex = -1,
   }) : super(width: width) {
-    pieceSide = squareSide * 0.9; //棋子的宽度 = 棋盘一个格子的宽度 * 90%
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    doPaint(
-      canvas,
-      thePaint,
-      phase: phase,
-      gridWidth: gridWidth,
-      squareSide: squareSide,
-      pieceSide: pieceSide,
-      offsetX: BoardWidget.Padding + squareSide / 2,
-      offsetY: BoardWidget.Padding + BoardWidget.DigitsHeight + squareSide / 2,
-      focusIndex: focusIndex,
-      blurIndex: blurIndex,
-    );
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    // 每次重建 Painter 时都要重画
-    // return true;
-    return false;
+    pieceSide = squareSide * 0.9;
   }
 
   static doPaint(
@@ -56,7 +38,16 @@ class PiecesPainter extends PainterBase {
     int focusIndex = -1,
     int blurIndex = 1,
   }) {
-    //
+    //绘制一个棋子的工作大致有以下几个步骤：
+    // 绘制棋子棋子大小相同的圆形阴影，阴隐要放在其它绘图之下；
+    // 区分棋子的颜色，填充指定大小的圆
+    // 区分棋子的颜色在代表棋子的圆外添加一个圆圈边框
+    // 在棋盘的圆圈中间，区分颜色写上代表棋子的文字
+
+    // 将绘制动作分解成两步：
+    // 第一步我们确定各个棋子以及其所应出现的位置，并把它们添加到一个列表中
+    // 第二步我们对已标定位置的每一个棋子棋子执行绘图动作
+
     final left = offsetX, top = offsetY;
 
     // 在 Flutter 中绘制阴影，需要先将阴影对象添加到一个 Path 中
@@ -65,11 +56,11 @@ class PiecesPainter extends PainterBase {
     final piecesToDraw = <PiecePaintStub>[];
 
     for (var row = 0; row < 10; row++) {
-      //9行
+      //
       for (var column = 0; column < 9; column++) {
         //
         final piece = phase.pieceAt(row * 9 + column);
-        if (piece == Piece.Empty) continue;
+        if (piece == Piece.Empty) continue; //为空,没有棋在此点上
 
         // 根据行列位置，计算棋子的位置
         var pos = Offset(left + squareSide * column, top + squareSide * row);
@@ -82,23 +73,17 @@ class PiecesPainter extends PainterBase {
         );
       }
     }
-
-    //绘制棋子
     // 绘制黑色的厚度为 2dp 的棋子阴影
     canvas.drawShadow(shadowPath, Colors.black, 2, true);
 
+    // 第二步我们对已标定位置的每一个棋子棋子执行绘图动作  ============
+
     paint.style = PaintingStyle.fill;
 
-    // final textStyle = TextStyle(
-    //   color: ColorConsts.PieceTextColor,
-    //   fontSize: pieceSide * 0.8,
-    //   height: 1.0,
-    // );
-    //添加字体
     final textStyle = TextStyle(
       color: ColorConsts.PieceTextColor,
       fontSize: pieceSide * 0.8,
-      fontFamily: 'QiTi', //添加字体
+      fontFamily: 'QiTi',
       height: 1.0,
     );
 
@@ -142,18 +127,20 @@ class PiecesPainter extends PainterBase {
     // draw focus and blur position
     // 绘制棋子的选定效果，注意绘制的次序，先绘制的在下层
     if (focusIndex != -1) {
-      final int row = focusIndex ~/ 9, column = focusIndex % 9; //还原棋盘坐票
+      //
+      final int row = focusIndex ~/ 9, column = focusIndex % 9;
+
       paint.color = ColorConsts.FocusPosition;
       paint.style = PaintingStyle.stroke;
-      paint.strokeWidth = 2;
+      paint.strokeWidth = 3;
 
       canvas.drawCircle(
         Offset(left + column * squareSide, top + row * squareSide),
         pieceSide / 2,
         paint,
       );
-
     }
+
     if (blurIndex != -1) {
       //
       final row = blurIndex ~/ 9, column = blurIndex % 9;
@@ -168,10 +155,28 @@ class PiecesPainter extends PainterBase {
       );
     }
   }
-}
 
-class PiecePaintStub {
-  final String piece;
-  final Offset pos; // 棋子呈现位置
-  PiecePaintStub({this.piece, this.pos});
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+    doPaint(
+      canvas,
+      thePaint,
+      phase: phase,
+      gridWidth: gridWidth,
+      squareSide: squareSide,
+      pieceSide: pieceSide,
+      offsetX: BoardWidget.Padding + squareSide / 2,
+      offsetY: BoardWidget.Padding + BoardWidget.DigitsHeight + squareSide / 2,
+      focusIndex: focusIndex,
+      blurIndex: blurIndex,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    return true; //每次重建 Painter 时都要重画
+    //===============================这里是返回什么才对？=========================
+  }
 }

@@ -1,14 +1,12 @@
 import '../cchess/phase.dart';
-import '../cchess/cc-base.dart';
 
-// Battle类集中管理棋盘上的棋子、对战结果、引擎调用等事务
+//Battle 类将集中管理横盘上的棋子、对战结果、引擎调用等事务
 class Battle {
   //
   static Battle _instance;
 
   Phase _phase;
-
-  int _focusIndex, _blurIndex; //标记当前位置，和前一个位置
+  int _focusIndex, _blurIndex; //标记当前位置和前一个位置
 
   static get shared {
     _instance ??= Battle();
@@ -16,7 +14,7 @@ class Battle {
   }
 
   init() {
-    _phase = Phase.defaultPhase();
+    _phase = Phase.defaultPhase(); //默认开局时
     _focusIndex = _blurIndex = -1;
   }
 
@@ -25,16 +23,14 @@ class Battle {
   select(int pos) {
     _focusIndex = pos;
     _blurIndex = -1;
-    // _blurIndex = Move.InvalidIndex;
-
   }
 
   // 从 from 到 to 位置移动棋子，使用 _focusIndex 和 _blurIndex 来标记 from 和 to 位置
   // 棋子绘制时，将在这两个位置分别绘制棋子的移动前的位置和当前位置
   move(int from, int to) {
-    if(!_phase.move(from, to)) return false;
+    if (!_phase.move(from, to)) return false;
 
-    // 移动棋子时，更新这两个标志位置，然后的绘制会把它们展示在界面上
+    //移动棋子时，更新这两个标志位置，然后的绘制会把它们展示在界面上
     _blurIndex = from;
     _focusIndex = to;
 
