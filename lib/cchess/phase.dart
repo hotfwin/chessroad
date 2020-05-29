@@ -10,13 +10,15 @@ class Phase {
   // 中国象棋的棋子放在纵线交叉点上，棋盘上总共有10行9列的交叉点位，一共90个位置
   List<String> _pieces; // 10行9列
 
+  int halfMove = 0, fullMove = 0; //无吃子步数、总回合数
+
   get side => _side;
 
   trunSide() => _side = Side.oppo(side); //交换下棋方
 
   String pieceAt(int index) => _pieces[index]; //查询10行9列的某个位置上的棋子
 
-  Phase.defaultPhase() { 
+  Phase.defaultPhase() {
     //
     _side = Side.Red;
     _pieces = List<String>(90);
@@ -69,7 +71,7 @@ class Phase {
     for (var i = 0; i < 90; i++) {
       _pieces[i] ??= Piece.Empty;
     }
-  } 
+  }
 
   /// 验证移动棋子的着法是否合法
   bool validateMove(int from, int to) {
@@ -81,15 +83,55 @@ class Phase {
     //
     if (!validateMove(from, to)) return false;
 
+    // 记录无吃子步数
+    if (_pieces[to] != Piece.Empty) {
+      halfMove = 0;
+    } else {
+      halfMove++;
+    }
+
     // 修改棋盘
     _pieces[to] = _pieces[from];
     _pieces[from] = Piece.Empty;
 
     // 交换走棋方
-    // _side = Side.oppo(_side);
+    _side = Side.oppo(_side);
 
     return true;
   }
 
+  //根据局面数据生成局面表示字符串（FEN）
+  String toFen() {
+    var fen = '';
 
+    // 
+    for (var row = 0; row < 10; row++) {
+      var emptyCounter = 0;
+      for (var column = 0; column < 9; column++) {
+        final piece = pieceAt(row * 9 + column);
+        if(piece==Piece.Empty){
+          emptyCounter++;
+        }else{
+          if(emptyCounter>0){
+            fen+=emptyCounter.toString();
+            emptyCounter=0;
+          }
+          fen+=piece;
+        }
+      }
+
+      if (emptyCounter > 0) fen += emptyCounter.toString();
+      if (row < 9) fen += '/';
+    }
+
+    fen += ' $side';  //行棋方
+
+    fen += ' - - ';     //王车易位和吃过路兵标志
+
+    // step counter
+    fen += '$halfMove $fullMove';   //无吃子步数、总回合数
+
+    return fen;
+
+  }
 }

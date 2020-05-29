@@ -1,3 +1,4 @@
+import '../cchess/cc-base.dart';
 import '../cchess/phase.dart';
 
 //Battle 类将集中管理横盘上的棋子、对战结果、引擎调用等事务
@@ -40,6 +41,11 @@ class Battle {
   // 清除棋子的选中和移动前的位置指示
   clear() {
     _blurIndex = _focusIndex = -1;
+  }
+
+  BattleResult scanBattleResult() {
+    // TODO:
+    return BattleResult.Pending;
   }
 
   get phase => _phase;

@@ -4,6 +4,7 @@ import '../game/battle.dart';
 import '../cchess/cc-base.dart';
 import '../common/color-consts.dart';
 import '../main.dart';
+import '../engine/cloud-engine.dart';
 
 class BattlePage extends StatefulWidget {
   // static const BoardMarginV = 10.0, BoardMarginH = 10.0; //棋盘的纵横方向的边距
@@ -16,6 +17,9 @@ class BattlePage extends StatefulWidget {
 }
 
 class _BattlePageState extends State<BattlePage> {
+  String _status = ''; //对战后台的状态
+  changeStatus(String status) => setState(() => _status = status);
+
   void calcScreenPaddingH() {
     //
     // 当屏幕的纵横比小于16/9时，限制棋盘的宽度
@@ -61,7 +65,21 @@ class _BattlePageState extends State<BattlePage> {
         //
       } else if (Battle.shared.move(Battle.shared.focusIndex, index)) {
         print('现在点击的棋子和上一次选择棋子不同边，要么是吃子，要么是移动棋子到空白处');
-        // todo: scan game result
+        final result = Battle.shared.scanBattleResult();
+
+        switch (result) {
+          case BattleResult.Pending:
+            // 玩家走一步棋后，如果游戏还没有结束，则启动引擎走棋
+            engineToGo();
+            break;
+          case BattleResult.Win:
+            break;
+          case BattleResult.Lose:
+            break;
+          case BattleResult.Draw:
+            break;
+        }
+        
       }
       //
     } else {
@@ -123,7 +141,8 @@ class _BattlePageState extends State<BattlePage> {
           ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('[游戏状态]', maxLines: 1, style: subTitleStyle),
+            // child: Text('[游戏状态]', maxLines: 1, style: subTitleStyle),
+            child: Text(_status, maxLines: 1, style: subTitleStyle),
           ),
         ],
       ),
@@ -247,6 +266,37 @@ class _BattlePageState extends State<BattlePage> {
         ),
       ),
     );
+  }
+
+  engineToGo() async {
+    changeStatus('对方思考中.....');
+
+    final response = await CloudEngine().search(Battle.shared.phase);
+
+    // 引擎返回'move'表示有最佳着法可用
+    if (response.type == 'move') {
+      final step = response.value;
+      Battle.shared.move(step.from, step.to); //更新移动棋子
+
+      final result = Battle.shared.scanBattleResult(); //对战结果
+      switch (result) {
+        case BattleResult.Pending:
+          changeStatus('请走棋...');
+          break;
+        case BattleResult.Win:
+          changeStatus('你羸了');
+          break;
+        case BattleResult.Lose:
+          // todo:
+          break;
+        case BattleResult.Draw:
+          // todo:
+          break;
+      }
+    } else {
+      print('没有取得下法,云主机计算出错?');
+      changeStatus('出错:${response.type}');
+    }
   }
 
   @override
